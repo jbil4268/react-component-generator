@@ -18,7 +18,7 @@
 - `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`는 서버 전용 값이다. 클라이언트 코드(`src/`)로 노출하지 않는다.
   근거: `server/index.ts:59-62`에서만 읽고, `server/index.ts:147-156`의 `/api/config`는 boolean만 반환한다.
 - `.env` 파일을 읽거나 출력하거나 커밋하지 않는다. 근거: `.gitignore`에 `.env` 등록.
-- 사용자가 입력한 API 키는 저장하지 않는다. 근거: `src/App.tsx:24`는 React state만 사용하고, `localStorage`에는 `theme`만 저장한다 (`src/App.tsx:32,39`).
+- 사용자가 입력한 API 키는 브라우저 `localStorage`(`apiKeys`, 프로바이더별)에만 저장하고, 서버 저장·로그·커밋 대상으로 만들지 않는다. 근거: `src/App.tsx:49`. 키는 서버로 `/api/generate` 요청 본문에만 실리며, 같은 브라우저의 XSS·확장 프로그램에 노출될 수 있다는 점을 감수한 결정이다.
 
 ### Cross-Boundary Constraints
 

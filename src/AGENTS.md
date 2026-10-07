@@ -2,7 +2,7 @@
 
 ## Module Context
 
-Vite + React 19 프런트엔드. `App.tsx`가 프로바이더/키/테마 상태를 관리하고, `hooks/useComponentGenerator.ts`가 `/api/generate`를 호출하며, `components/`가 입력, 미리보기, 코드 표시를 담당한다.
+Vite + React 19 프런트엔드. `App.tsx`가 프로바이더/키/테마/프롬프트 히스토리 상태를 관리하고(`hooks/useLocalStorage.ts`로 새로고침 후에도 유지), `hooks/useComponentGenerator.ts`가 `/api/generate`를 호출하며, `components/`가 입력, 미리보기, 코드 표시를 담당한다.
 
 ## Tech Stack & Constraints
 
@@ -34,7 +34,7 @@ Vite + React 19 프런트엔드. `App.tsx`가 프로바이더/키/테마 상태�
 
 - `LivePreview`는 AI가 생성한 코드를 `react-live`로 같은 페이지에서 실행한다. `LiveProvider`에 `scope`를 넘기지 않아 `React` 외에는 접근하지 못한다 (`components/LivePreview.tsx:74`). `scope`에 `apiKey`, 서버 응답, 앱 상태를 넣지 않는다.
 - 생성 코드를 `dangerouslySetInnerHTML`이나 `innerHTML`로 렌더하지 않는다. 현재 `src/`에는 사용처가 없다.
-- `apiKey`는 `App.tsx`의 React state에만 둔다 (`App.tsx:24`). `localStorage`에는 `theme`만 저장한다 (`App.tsx:32,39`). 프로바이더 변경 시 키를 비운다 (`App.tsx:61`).
+- `apiKey`는 `localStorage`의 `apiKeys`(프로바이더별 맵)에만 저장한다 (`App.tsx:49`). `localStorage` 키는 `theme`, `provider`, `apiKeys`, `promptHistory`, `components`이며, 읽기·쓰기는 `hooks/useLocalStorage.ts`를 거친다. 프로바이더를 바꾸면 해당 프로바이더의 키가 표시된다. 키를 `scope`, 로그, 서버 저장소로 보내지 않는다.
 
 ### Asymmetry
 
@@ -47,4 +47,4 @@ Vite + React 19 프런트엔드. `App.tsx`가 프로바이더/키/테마 상태�
 
 ### Test Boundary
 
-- 테스트 있음: `components/PromptInput.tsx`만 있다. 테스트 없음: `App.tsx`, `hooks/useComponentGenerator.ts`, `LivePreview`, `CodeView`, `ComponentCard`. 훅이나 App 로직을 바꿀 때는 해당 동작을 검증하는 테스트를 추가한다.
+- 테스트 있음: `PromptInput`, `App`(영속화), `useLocalStorage`, `useComponentGenerator`(영속화), `utils/`. 테스트 없음: `LivePreview`, `CodeView`, `ComponentCard`. 훅이나 App 로직을 바꿀 때는 해당 동작을 검증하는 테스트를 추가한다.

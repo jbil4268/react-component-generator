@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { PromptInput } from './components/PromptInput';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponentGenerator } from './hooks/useComponentGenerator';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import { addToHistory } from './utils/promptHistory';
 import type { Provider } from './types';
 import './App.css';
 
@@ -20,10 +22,35 @@ const PROVIDER_CONFIG = {
   google: { label: 'Google', placeholder: 'AIza...' },
 } as const;
 
+type ApiKeys = Record<Provider, string>;
+
+const EMPTY_API_KEYS: ApiKeys = { anthropic: '', google: '' };
+
+// 저장값이 형식에 맞지 않으면 에러를 던져 useLocalStorage가 초기값으로 복구하게 한다.
+function reviveProvider(raw: unknown): Provider {
+  if (typeof raw === 'string' && raw in PROVIDER_CONFIG) return raw as Provider;
+  throw new Error('invalid provider');
+}
+
+function reviveApiKeys(raw: unknown): ApiKeys {
+  const { anthropic, google } = (raw ?? {}) as Partial<Record<Provider, unknown>>;
+  return {
+    anthropic: typeof anthropic === 'string' ? anthropic : '',
+    google: typeof google === 'string' ? google : '',
+  };
+}
+
+function reviveHistory(raw: unknown): string[] {
+  if (!Array.isArray(raw)) throw new Error('invalid history');
+  return raw.filter((item): item is string => typeof item === 'string');
+}
+
 function App() {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('apiKeys', EMPTY_API_KEYS, reviveApiKeys);
   const [showKey, setShowKey] = useState(false);
-  const [provider, setProvider] = useState<Provider>('google');
+  const [provider, setProvider] = useLocalStorage<Provider>('provider', 'google', reviveProvider);
+  const [history, setHistory] = useLocalStorage<string[]>('promptHistory', [], reviveHistory);
+  const apiKey = apiKeys[provider];
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
     google: false,
@@ -53,12 +80,12 @@ function App() {
       alert(`${PROVIDER_CONFIG[provider].label} API 키를 입력하거나 .env에 설정해주세요.`);
       return;
     }
+    setHistory((prev) => addToHistory(prev, prompt));
     generate(prompt, apiKey || undefined, provider);
   };
 
-  const handleProviderChange = (newProvider: Provider) => {
-    setProvider(newProvider);
-    setApiKey('');
+  const setApiKey = (value: string) => {
+    setApiKeys((prev) => ({ ...prev, [provider]: value }));
   };
 
   const activeProvider = PROVIDER_CONFIG[provider].label;
@@ -106,7 +133,7 @@ function App() {
             {DOTS}
           </div>
           <div className="window-body">
-            <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+            <PromptInput onGenerate={handleGenerate} isLoading={isLoading} history={history} />
           </div>
         </section>
 
@@ -124,7 +151,7 @@ function App() {
               <select
                 id="provider"
                 value={provider}
-                onChange={(e) => handleProviderChange(e.target.value as Provider)}
+                onChange={(e) => setProvider(e.target.value as Provider)}
               >
                 {Object.entries(PROVIDER_CONFIG).map(([key, { label }]) => (
                   <option key={key} value={key}>
