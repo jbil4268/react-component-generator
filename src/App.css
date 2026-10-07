@@ -411,6 +411,35 @@
   opacity: 0.8;
 }
 
+.prompt-meta {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.prompt-error {
+  margin-right: auto;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.prompt-counter {
+  color: var(--ink-soft);
+}
+
+.prompt-counter--over {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.prompt-textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
 .btn-generate {
   height: 54px;
   padding: 0 24px;
@@ -876,6 +905,11 @@
 
   .prompt-form {
     grid-template-columns: 1fr;
+  }
+
+  .prompt-meta {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .btn-generate {
