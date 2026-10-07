@@ -1,0 +1,41 @@
+@import url('https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --font-pixel: 'Galmuri11', 'Galmuri9', 'DungGeunMo', 'Malgun Gothic', ui-monospace, monospace;
+  --font-mono: 'Galmuri Mono11', 'Galmuri11', ui-monospace, Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-pixel);
+  background-color: var(--page);
+  background-image: radial-gradient(var(--dots) 1px, transparent 1.2px);
+  background-size: 8px 8px;
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--yellow);
+  color: #111;
+}
